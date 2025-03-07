@@ -27,7 +27,6 @@ y_pred= dlode45(@odeModel,t_pred,dlarray(x0_pred),neuralOdeParameters,DataFormat
 
 KW_N=4;
 
-
 y_learn = extractdata(y_learn(:,1,:));
 y_learn = reshape(y_learn,size(y_learn,1),size(y_learn,3));
 
@@ -40,7 +39,7 @@ y_learn_2_org2=sum(y_learn(KW_N*(2-1)+1:KW_N*2,:));
 y_pred_2_org1=sum(y_pred(KW_N*(1-1)+1:KW_N*1,:));
 y_pred_2_org2=sum(y_pred(KW_N*(2-1)+1:KW_N*2,:));
 
-step=100;
+step=800;
 t_learn=(1:step:size(y_learn_2_org1,2))*dt;
 t_pred=(1:step:size(y_pred_2_org1,2))*dt+t_learn_end;
 
@@ -63,6 +62,7 @@ p_x = [t_learn_end t_pred_end t_pred_end t_learn_end];
 p_y = [0 0 0.9 0.9];
 patch(p_x,p_y,[43,105,10]/256,'FaceAlpha',0.2,'EdgeColor','none');
 legend('Ground Truth','Predicted results I','Predicted results II');
+saveas(gcf, sprintf('%s/tau%d_x.png',res_path,demo_index));
 
 figure(2)
 plot(t_test,y_test(2,:),'b-',t_learn,y_learn_2_org2(1:step:end),"ro",t_pred,y_pred_2_org2(1:step:end),'ko');
@@ -83,6 +83,7 @@ p_x = [t_learn_end t_pred_end t_pred_end t_learn_end];
 p_y = [0 0 0.9 0.9];
 patch(p_x,p_y,[43,105,10]/256,'FaceAlpha',0.2,'EdgeColor','none');
 legend('Ground Truth','Predicted results I','Predicted results II');
+saveas(gcf, sprintf('%s/tau%d_y.png',res_path,demo_index));
 
 figure(3)
 plot(y_test(1,:),y_test(2,:),'b-',y_learn_2_org1(1:step:end),y_learn_2_org2(1:step:end),"ro",y_pred_2_org1(1:step:end),y_pred_2_org2(1:step:end),'ko');
@@ -90,9 +91,7 @@ xlabel("x(t)",'FontSize',16)
 ylabel("y(t)",'FontSize',16)
 grid on;
 legend('Ground Truth','Predicted results I','Predicted results II');
-
-
-% print(sprintf('%s/tau_%d',res_path,demo_index),'-dpng');
+saveas(gcf, sprintf('%s/tau%d_x_y.png',res_path,demo_index));
 
 function y = odeModel(~,y,theta)
 

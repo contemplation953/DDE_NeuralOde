@@ -2,7 +2,7 @@ clc;clear;close all;
 
 
 %% Synthesize Data of Target Dynamics
-demo_index=1;
+demo_index=2;
 xTrain=load(sprintf('%s/Goodwin/data/gd_%d_kw.mat',pwd,demo_index)).X1;
 %tau1 20s后开始训练;
 %xTrain=xTrain(:,2001:end);
@@ -23,46 +23,46 @@ t_end=400;
 dt=5e-3;
 t = dt:dt:t_end;
 %% Define and Initialize Model Parameters
-% neuralOdeParameters = struct;
-% 
-% stateSize = size(xTrain,1);
-% hiddenSize = 20;
-% 
-% neuralOdeParameters.fc1 = struct;
-% sz = [hiddenSize stateSize];
-% neuralOdeParameters.fc1.Weights = initializeGlorot(sz, hiddenSize, stateSize,'single');
-% neuralOdeParameters.fc1.Bias = initializeZeros([hiddenSize 1]);
-% 
-% neuralOdeParameters.fc2 = struct;
-% sz = [hiddenSize hiddenSize];
-% neuralOdeParameters.fc2.Weights = initializeGlorot(sz, hiddenSize, stateSize,'single');
-% neuralOdeParameters.fc2.Bias = initializeZeros([hiddenSize 1]);
-% 
-% 
-% 
-% neuralOdeParameters.fc3 = struct;
-% sz = [stateSize hiddenSize];
-% neuralOdeParameters.fc3.Weights = initializeGlorot(sz, stateSize, hiddenSize,'single');
-% neuralOdeParameters.fc3.Bias = initializeZeros([stateSize 1]);
-neuralOdeParameters=load(sprintf('%s/Goodwin/data/neuralOdeParameters_%d.mat',pwd,demo_index)).neuralOdeParameters;
+neuralOdeParameters = struct;
+
+stateSize = size(xTrain,1);
+hiddenSize = 20;
+
+neuralOdeParameters.fc1 = struct;
+sz = [hiddenSize stateSize];
+neuralOdeParameters.fc1.Weights = initializeGlorot(sz, hiddenSize, stateSize,'single');
+neuralOdeParameters.fc1.Bias = initializeZeros([hiddenSize 1]);
+
+neuralOdeParameters.fc2 = struct;
+sz = [hiddenSize hiddenSize];
+neuralOdeParameters.fc2.Weights = initializeGlorot(sz, hiddenSize, stateSize,'single');
+neuralOdeParameters.fc2.Bias = initializeZeros([hiddenSize 1]);
+
+
+
+neuralOdeParameters.fc3 = struct;
+sz = [stateSize hiddenSize];
+neuralOdeParameters.fc3.Weights = initializeGlorot(sz, stateSize, hiddenSize,'single');
+neuralOdeParameters.fc3.Bias = initializeZeros([stateSize 1]);
+%neuralOdeParameters=load(sprintf('%s/Goodwin/data/neuralOdeParameters_%d.mat',pwd,demo_index)).neuralOdeParameters;
 
 %% Specify Training Options
 
-neuralOdeTimesteps = 800;
+neuralOdeTimesteps = 500;
 timesteps = (0:neuralOdeTimesteps)*dt;
 
 % Adam optimization
 gradDecay = 0.9;
 sqGradDecay = 0.999;
 %2e-3
-learnRate = 1e-4;
+learnRate = 1e-3;
 
 %Train for 1200 iterations with a mini-batch-size of 200
-numIter = 2e3;
+numIter = 1e3;
 miniBatchSize = 100;
 
 %绘图频率
-plotFrequency = 2e2;
+plotFrequency = 2e3;
 
 %% Train Model Using Custom Training Loop
 
@@ -81,6 +81,7 @@ iteration = 0;
 vel=[];
 momentum=0.9;
 
+loss_list=zeros(1,numIter);
 while iteration < numIter && ~monitor.Stop
     iteration = iteration + 1;
 
@@ -90,7 +91,8 @@ while iteration < numIter && ~monitor.Stop
 
     % Evaluate network and compute loss and gradients
     [loss,gradients] = dlfeval(@modelLoss,timesteps,X,neuralOdeParameters,targets);
-
+    
+    loss_list(iteration) = extractdata(loss);
     % Update network adamupdate
     %[neuralOdeParameters,averageGrad,averageSqGrad] = adamupdate(neuralOdeParameters,gradients,averageGrad,averageSqGrad,iteration,learnRate,gradDecay,sqGradDecay);
 
@@ -134,7 +136,7 @@ while iteration < numIter && ~monitor.Stop
     updateInfo(monitor,Iteration=iteration,LearnRate=learnRate);
     monitor.Progress = 100*iteration/numIter;
 end
-save(sprintf('%s/Goodwin/data/neuralOdeParameters_%d.mat',pwd,demo_index),'neuralOdeParameters');
+save(sprintf('%s/Goodwin/data/neuralOdeParameters_%d.mat',pwd,demo_index),'loss_list','neuralOdeParameters');
 
 %% Model Function
 function X = model(tspan,X0,neuralOdeParameters)

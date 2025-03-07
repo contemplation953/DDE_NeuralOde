@@ -2,7 +2,7 @@ clc;clear;close all;
 
 
 %% Synthesize Data of Target Dynamics
-demo_index=2;
+demo_index=3;
 xTrain=load(sprintf('%s/Mackey_Glass/data/mg_origin_%d_kw.mat',pwd,demo_index)).X1;
 
 x0 = xTrain(:,1);
@@ -12,29 +12,29 @@ t_end=10;
 dt=1e-3;
 t = dt:dt:t_end;
 %% Define and Initialize Model Parameters
-% neuralOdeParameters = struct;
-% 
-% stateSize = size(xTrain,1);
-% hiddenSize = 16;
-% 
-% neuralOdeParameters.fc1 = struct;
-% sz = [hiddenSize stateSize];
-% neuralOdeParameters.fc1.Weights = initializeGlorot(sz, hiddenSize, stateSize,'single');
-% neuralOdeParameters.fc1.Bias = initializeZeros([hiddenSize 1]);
-% 
-% neuralOdeParameters.fc2 = struct;
-% sz = [hiddenSize hiddenSize];
-% neuralOdeParameters.fc2.Weights = initializeGlorot(sz, hiddenSize, stateSize,'single');
-% neuralOdeParameters.fc2.Bias = initializeZeros([hiddenSize 1]);
-% 
-% neuralOdeParameters.fc3 = struct;
-% sz = [stateSize hiddenSize];
-% neuralOdeParameters.fc3.Weights = initializeGlorot(sz, stateSize, hiddenSize,'single');
-% neuralOdeParameters.fc3.Bias = initializeZeros([stateSize 1]);
-neuralOdeParameters=load(sprintf('%s/Mackey_Glass/data/neuralOdeParameters_%d.mat',pwd,demo_index)).neuralOdeParameters;
+neuralOdeParameters = struct;
+
+stateSize = size(xTrain,1);
+hiddenSize = 16;
+
+neuralOdeParameters.fc1 = struct;
+sz = [hiddenSize stateSize];
+neuralOdeParameters.fc1.Weights = initializeGlorot(sz, hiddenSize, stateSize,'single');
+neuralOdeParameters.fc1.Bias = initializeZeros([hiddenSize 1]);
+
+neuralOdeParameters.fc2 = struct;
+sz = [hiddenSize hiddenSize];
+neuralOdeParameters.fc2.Weights = initializeGlorot(sz, hiddenSize, stateSize,'single');
+neuralOdeParameters.fc2.Bias = initializeZeros([hiddenSize 1]);
+
+neuralOdeParameters.fc3 = struct;
+sz = [stateSize hiddenSize];
+neuralOdeParameters.fc3.Weights = initializeGlorot(sz, stateSize, hiddenSize,'single');
+neuralOdeParameters.fc3.Bias = initializeZeros([stateSize 1]);
+%neuralOdeParameters=load(sprintf('%s/Mackey_Glass/data/neuralOdeParameters_%d.mat',pwd,demo_index)).neuralOdeParameters;
 
 %% Specify Training Options
-neuralOdeTimesteps = 2000;
+neuralOdeTimesteps = 500;
 timesteps = (0:neuralOdeTimesteps)*dt;
 
 % Adam optimization
@@ -48,7 +48,7 @@ numIter = 1e3;
 miniBatchSize = 100;
 
 %绘图频率
-plotFrequency = 200;
+plotFrequency = 2000;
 
 %% Train Model Using Custom Training Loop
 
@@ -66,6 +66,7 @@ plottingTimesteps = 2:numTimeSteps;
 iteration = 0;
 vel=[];
 
+loss_list=zeros(1,numIter);
 while iteration < numIter && ~monitor.Stop
     iteration = iteration + 1;
 
@@ -83,6 +84,7 @@ while iteration < numIter && ~monitor.Stop
 %     [neuralOdeParameters,vel] = sgdmupdate(neuralOdeParameters,gradients,vel,learnRate);
     % Plot loss
     recordMetrics(monitor,iteration,Loss=loss);
+    loss_list(iteration) = extractdata(loss);
 
     % Plot predicted vs. real dynamics
     if mod(iteration,plotFrequency) == 0  || iteration == 1
@@ -105,7 +107,7 @@ while iteration < numIter && ~monitor.Stop
     updateInfo(monitor,Iteration=iteration,LearnRate=learnRate);
     monitor.Progress = 100*iteration/numIter;
 end
-save(sprintf('%s/Mackey_Glass/data/neuralOdeParameters_%d.mat',pwd,demo_index),'neuralOdeParameters');
+save(sprintf('%s/Mackey_Glass/data/neuralOdeParameters_%d.mat',pwd,demo_index),'loss_list','neuralOdeParameters');
 
 %% Model Function
 function X = model(tspan,X0,neuralOdeParameters)

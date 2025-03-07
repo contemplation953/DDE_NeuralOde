@@ -6,6 +6,7 @@ dt=1e-3;
 t_test_end=100;
 
 data_path=sprintf('%s/Mackey_Glass/data',pwd);
+res_path=sprintf('%s/Mackey_Glass/res',pwd);
 chaos_t_test=load(sprintf('%s/chaos.mat',data_path)).t_test;
 chaos_y_test=load(sprintf('%s/chaos.mat',data_path)).y_test;
 
@@ -18,6 +19,7 @@ y_pred=[0.3,res];
 chaos_y_test=chaos_y_test(20/dt:end);
 y_pred=y_pred(20/dt:end);
 
+fs=1/dt;
 x=chaos_y_test;
 N = length(x);
 xdft = fft(x);
@@ -42,4 +44,6 @@ plot(freq,pow2db(psdx),'LineWidth',4)
 grid on
 xlabel("Frequency (Hz)",'FontSize',16)
 ylabel("Power/Frequency (dB/Hz)",'FontSize',16)
-legend("Ground Truth","Predicted Results");
+lgd=legend("Ground Truth","Predicted Results");
+lgd.FontSize=16;
+%saveas(gcf, sprintf('%s/gt_100.png',res_path));

@@ -41,16 +41,16 @@ y_pred_2_org1=sum(y_pred(KW_N*(1-1)+1:KW_N*1,:));
 y_pred_2_org2=sum(y_pred(KW_N*(2-1)+1:KW_N*2,:));
 y_pred_2_org3=sum(y_pred(KW_N*(3-1)+1:KW_N*3,:));
 
-step=100;
+step=3000;
 t_learn=(1:step:size(y_learn_2_org1,2))*dt;
 t_pred=(1:step:size(y_pred_2_org1,2))*dt+t_learn_end;
 
 figure(1);
 plot(t_test,y_test(1,:),'b-',t_learn,y_learn_2_org1(1:step:end),"ro",t_pred,y_pred_2_org1(1:step:end),'ko')
 hold on;
-plot(0,y_test(1),'rO','LineWidth',5)
+plot(0,y_test(1),'ro','LineWidth',5)
 hold on;
-plot(t_learn_end,y_pred_2_org1(1),'kO','LineWidth',5)
+plot(t_learn_end,y_pred_2_org1(1),'ko','LineWidth',5)
 xline(t_learn_end,'r--','LineWidth',2);
 xlabel("t",'FontSize',16)
 ylabel("x(t)",'FontSize',16)
@@ -63,15 +63,16 @@ p_x = [t_learn_end t_pred_end t_pred_end t_learn_end];
 p_y = [0 0 0.3 0.3];
 patch(p_x,p_y,[43,105,10]/256,'FaceAlpha',0.2,'EdgeColor','none');
 legend('Ground Truth','Predicted results I','Predicted results II');
+saveas(gcf, sprintf('%s/tau_%d_x.png',res_path,demo_index));
 
 
 figure(2);
 plot(t_test,y_test(2,:),'b-',t_learn,y_learn_2_org2(1:step:end),"ro",t_pred,y_pred_2_org2(1:step:end),'ko');
 hold on;
 hold on;
-plot(0,y_test(1),'rO','LineWidth',5)
+plot(0,y_test(1),'ro','LineWidth',5)
 hold on;
-plot(t_learn_end,y_pred_2_org2(1),'kO','LineWidth',5)
+plot(t_learn_end,y_pred_2_org2(1),'ko','LineWidth',5)
 xline(t_learn_end,'r--','LineWidth',2);
 xlabel("t",'FontSize',16)
 ylabel("y(t)",'FontSize',16)
@@ -84,13 +85,14 @@ p_x = [t_learn_end t_pred_end t_pred_end t_learn_end];
 p_y = [0 0 1.2 1.2];
 patch(p_x,p_y,[43,105,10]/256,'FaceAlpha',0.2,'EdgeColor','none');
 legend('Ground Truth','Predicted results I','Predicted results II');
+saveas(gcf, sprintf('%s/tau_%d_y.png',res_path,demo_index));
 
 figure(3);
 plot(t_test,y_test(3,:),'b-',t_learn,y_learn_2_org3(1:step:end),"ro",t_pred,y_pred_2_org3(1:step:end),'ko');
 hold on;
-plot(0,y_test(1),'rO','LineWidth',5)
+plot(0,y_test(1),'ro','LineWidth',5)
 hold on;
-plot(t_learn_end,y_pred_2_org3(1),'kO','LineWidth',5)
+plot(t_learn_end,y_pred_2_org3(1),'ko','LineWidth',5)
 xline(t_learn_end,'r--','LineWidth',2);
 xlabel("t",'FontSize',16)
 ylabel("z(t)",'FontSize',16)
@@ -103,6 +105,7 @@ p_x = [t_learn_end t_pred_end t_pred_end t_learn_end];
 p_y = [0 0 2.5 2.5];
 patch(p_x,p_y,[43,105,10]/256,'FaceAlpha',0.2,'EdgeColor','none');
 legend('Ground Truth','Predicted results I','Predicted results II');
+saveas(gcf, sprintf('%s/tau_%d_z.png',res_path,demo_index));
 
 function y = odeModel(~,y,theta)
 
